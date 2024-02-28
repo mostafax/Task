@@ -143,7 +143,7 @@ class Transformation:
 
 
 # Initialize with the sales data path and weather API key
-weather_api_key = '523148460fe04e90d8129489306261d1'
+weather_api_key = 'cbbda7a0b45fcdb72e944964c45c80c4'
 data_extractor = DataExtractor('sales_data.csv', weather_api_key)
 
 # Read the sales data
@@ -156,14 +156,30 @@ if data_extractor.sales_data is not None:
 
     # Enrich the sales data with user and weather data
     data_extractor.enrich_sales_data()
-
+    data_extractor.save_enriched_data_to_csv("data.csv")
     # Instantiate the Transformation class with the enriched sales data
     transformation = Transformation(data_extractor.sales_data)
 
-    # Perform transformations
-    results = transformation.perform_transformations()
+    # Calculate total sales per customer and save to CSV
+    total_sales_per_customer = transformation.calculate_total_sales_per_customer()
+    total_sales_per_customer.to_csv('total_sales_per_customer.csv', index=True)
 
-    # The results can now be printed or saved to a CSV file
-    print(results)
+    # Determine the average order quantity per product and save to CSV
+    average_order_quantity_per_product = transformation.determine_average_order_quantity_per_product()
+    average_order_quantity_per_product.to_csv('average_order_quantity_per_product.csv', index=True)
+
+    # Identify top-selling products and save to CSV
+    top_selling_products = transformation.identify_top_selling_products_or_customers()[0] # Assuming this returns a tuple (products, customers)
+    top_selling_products.to_csv('top_selling_products.csv', index=True)
+
+    # Analyze sales trends over time and save to CSV
+    sales_trends = transformation.analyze_sales_trends_over_time()
+    sales_trends.to_csv('sales_trends.csv', index=True)
+
+    # Include weather data in analysis and save to CSV
+    weather_impact = transformation.include_weather_data_in_analysis()
+    weather_impact.to_csv('weather_impact.csv', index=True)
+    
+    
 else:
     print("Failed to load sales data.")
