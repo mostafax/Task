@@ -44,7 +44,7 @@ class DataExtractor:
         lat, lon = geo['lat'], geo['lng']
         response = requests.get(f'http://api.openweathermap.org/data/2.5/weather',
                                 params={'lat': lat, 'lon': lon, 'appid': self.weather_api_key})
-        print("W out")
+        
         return response.json() if response.status_code == 200 else print("Weather data not found.")
 
     def enrich_sales_data(self):
@@ -58,7 +58,8 @@ class DataExtractor:
             
             # Enrich with weather data if 'geo' data is available
             self.sales_data['weather_data'] = self.sales_data['geo'].apply(self.fetch_weather_data) if 'geo' in self.sales_data else None
-            
+            print("Weather data Collected.")
+
             print("Sales data enriched with user and weather data.")
         else:
             raise ValueError("Sales data or users data is not loaded. Please load the data first.")
@@ -83,14 +84,21 @@ class Transformation:
         """
         self.sales_data = sales_data
     def prepare_customer_data(self):
-        """
-        Prepares customer data for the Customers table.
-        """
-        # Extracting nested 'user_data' into separate columns
         customer_info = pd.json_normalize(self.sales_data['user_data'])
-        # Assuming 'id' in 'user_data' corresponds to 'customer_id'
         customer_info.rename(columns={'id': 'customer_id'}, inplace=True)
-        customer_info = customer_info[['customer_id', 'name', 'username', 'email', 'phone', 'website']].drop_duplicates()
+        # Including address information directly in the customer data
+        customer_info = customer_info[['customer_id', 'name', 'username', 'email', 'phone', 'website', 
+                                       'address.street', 'address.suite', 'address.city', 'address.zipcode',
+                                       'address.geo.lat', 'address.geo.lng']].drop_duplicates()
+        customer_info.rename(columns={
+            'address.street': 'street',
+            'address.suite': 'suite',
+            'address.city': 'city',
+            'address.zipcode': 'zipcode',
+            'address.geo.lat': 'geo_lat',
+            'address.geo.lng': 'geo_lng'
+        }, inplace=True)
+        
         return customer_info
 
     def prepare_product_data(self):
@@ -102,78 +110,62 @@ class Transformation:
         return product_info
 
     def prepare_orders_data(self):
-        """
-        Prepares orders data for the Orders table.
-        """
-        orders_info = self.sales_data[['order_id', 'customer_id', 'order_date']].drop_duplicates()
+        # Since OrderDetails is removed, we include product_id and quantity in Orders
+        orders_info = self.sales_data[['order_id', 'customer_id', 'order_date', 'product_id', 'quantity']].drop_duplicates()
         return orders_info
-
-    def prepare_order_details_data(self):
-        """
-        Prepares order details data for the OrderDetails table.
-        """
-        order_details_info = self.sales_data[['order_id', 'product_id', 'quantity', 'price']].drop_duplicates()
-        return order_details_info
+    
 
     def prepare_company_data(self):
-        # Assuming that self.sales_data['user_data'] is a column of dictionaries
-        company_data = self.sales_data['user_data'].apply(lambda x: x.get('company') if isinstance(x, dict) else None)
-        
-        # Normalize the company data
-        company_info = company_data.apply(lambda x: json_normalize(x) if x is not None else pd.DataFrame())
-        
-        # Since json_normalize returns a DataFrame, we need to concatenate all these DataFrames
-        company_info = pd.concat(company_info.tolist(), ignore_index=True).drop_duplicates().reset_index(drop=True)
-        
+        # Extract company information and normalize it
+        company_info = self.sales_data['user_data'].apply(lambda x: x['company'] if isinstance(x, dict) and 'company' in x else {})
+        company_info = pd.json_normalize(company_info)
+        company_info = company_info.drop_duplicates().reset_index(drop=True)
         return company_info
 
 
     def prepare_weather_data(self):
         """
-        Prepares weather data for the Weather table.
+        Prepares weather data for the WeatherRecord table including customer ID.
         """
         # Convert 'weather_data' from string to dictionary if it's not already
         self.sales_data['weather_data'] = self.sales_data['weather_data'].apply(
             lambda x: ast.literal_eval(x) if isinstance(x, str) else x
         )
+        
+        # Initialize a DataFrame to store the normalized weather data
+        weather_records = []
 
-        # Normalizing the nested structure within the 'weather_data'
-        # Since 'weather' is a list of dictionaries, we extract the first element
-        # Similarly, 'main' is a dictionary and we extract its contents
-        weather_info = pd.json_normalize(
-            self.sales_data['weather_data'],
-            record_path=['weather'],
-            meta=[
-                ['coord', 'lat'],
-                ['coord', 'lon'],
-                ['main', 'temp'],
-                ['main', 'humidity'],
-                'dt'
-            ],
-            errors='ignore'
-        )
+        # Normalize and extract the necessary data from the weather_data column
+        for index, row in self.sales_data.iterrows():
+            weather_data = row['weather_data']
+            if isinstance(weather_data, dict):
+                main_weather = weather_data.get('main', {})
+                weather_description = weather_data.get('weather', [{}])[0]  # get the first item in 'weather' list
+                
+                # Append the extracted data to the weather_records list
+                weather_records.append({
+                    'customer_id': row['customer_id'],
+                    'latitude': weather_data.get('coord', {}).get('lat'),
+                    'longitude': weather_data.get('coord', {}).get('lon'),
+                    'main': weather_description.get('main'),
+                    'description': weather_description.get('description'),
+                    'temperature': main_weather.get('temp'),
+                    'humidity': main_weather.get('humidity'),
+                    'weather_date': pd.to_datetime(weather_data.get('dt'), unit='s')
+                })
 
-        # Rename columns to match the database schema
-        weather_info.rename(
-            columns={
-                'coord.lat': 'latitude',
-                'coord.lon': 'longitude',
-                'main.temp': 'temperature',
-                'main.humidity': 'humidity',
-                'dt': 'date'
-            },
-            inplace=True
-        )
+        # Create a DataFrame from the records
+        weather_info = pd.DataFrame(weather_records)
 
-        # Convert Unix timestamp to datetime if 'dt' is a Unix timestamp
-        #FIX this 
-        weather_info['date'] = pd.to_datetime(weather_info['date'], unit='s')
+        # Drop any duplicates based on date to avoid one-to-many relationships
+        weather_info.drop_duplicates(subset=['customer_id', 'weather_date'], inplace=True)
 
-        # Drop duplicates and reset index
-        weather_info.drop_duplicates(inplace=True)
+        # Reset the index of the DataFrame
         weather_info.reset_index(drop=True, inplace=True)
 
         return weather_info
+
+
 
     def calculate_total_sales_per_customer(self):
         """Calculates total sales amount per customer."""
@@ -255,12 +247,18 @@ if data_extractor.sales_data is not None:
     transformation = Transformation(data_extractor.sales_data)
     prepare_customer_data_test = transformation.prepare_customer_data()
     print(prepare_customer_data_test)
+    print("*******************************")
     prepare_product_data_test = transformation.prepare_product_data()
+    print(prepare_product_data_test)
     print("*******************************")
 
-    print(prepare_product_data_test)
     prepare_company_data_test = transformation.prepare_company_data()
     print(prepare_company_data_test)
+    print("*******************************")
+
+    
+    prepare_orders_data_test = transformation.prepare_orders_data()
+    print(prepare_orders_data_test)
     print("*******************************")
 
     prepare_weather_data_test = transformation.prepare_weather_data()
