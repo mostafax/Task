@@ -44,7 +44,7 @@ class DataExtractor:
         lat, lon = geo['lat'], geo['lng']
         response = requests.get(f'http://api.openweathermap.org/data/2.5/weather',
                                 params={'lat': lat, 'lon': lon, 'appid': self.weather_api_key})
-        
+        print("OUT")
         return response.json() if response.status_code == 200 else print("Weather data not found.")
 
     def enrich_sales_data(self):
@@ -233,6 +233,140 @@ class Transformation:
         }
 
 
+
+
+import sqlite3
+import pandas as pd
+
+class DatabaseManager:
+    def __init__(self, db_name):
+        self.db_name = db_name
+        self.conn = None
+        self.cursor = None
+
+    def connect(self):
+        """
+        Creates a database connection.
+        """
+        self.conn = sqlite3.connect(self.db_name)
+        self.cursor = self.conn.cursor()
+
+    def create_tables(self):
+        """
+        Creates tables in the database according to the specified schema.
+        """
+        commands = [
+            '''CREATE TABLE IF NOT EXISTS Companies (
+                company_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                catch_phrase TEXT,
+                bs TEXT
+            )''',
+            '''CREATE TABLE IF NOT EXISTS Customers (
+                customer_id INTEGER PRIMARY KEY,
+                company_id INTEGER,
+                name TEXT NOT NULL,
+                username TEXT,
+                email TEXT,
+                phone TEXT,
+                website TEXT,
+                street TEXT,
+                suite TEXT,
+                city TEXT,
+                zipcode TEXT,
+                geo_lat REAL,
+                geo_lng REAL,
+                FOREIGN KEY (company_id) REFERENCES Companies (company_id)
+            )''',
+            '''CREATE TABLE IF NOT EXISTS Products (
+                product_id INTEGER PRIMARY KEY,
+                name TEXT NOT NULL,
+                price REAL
+            )''',
+            '''CREATE TABLE IF NOT EXISTS Orders (
+                order_id INTEGER PRIMARY KEY,
+                customer_id INTEGER,
+                order_date DATE,
+                product_id INTEGER,
+                quantity INTEGER,
+                FOREIGN KEY (customer_id) REFERENCES Customers (customer_id),
+                FOREIGN KEY (product_id) REFERENCES Products (product_id)
+            )''',
+            '''CREATE TABLE IF NOT EXISTS WeatherRecord (
+                weather_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                customer_id INTEGER,
+                latitude REAL,
+                longitude REAL,
+                main_weather TEXT,
+                description TEXT,
+                temperature REAL,
+                humidity INTEGER,
+                weather_date DATE,
+                FOREIGN KEY (customer_id) REFERENCES Customers (customer_id)
+            )'''
+        ]
+        for command in commands:
+            self.cursor.execute(command)
+        self.conn.commit()
+
+    def close(self):
+        """
+        Closes the database connection.
+        """
+        self.conn.close()
+
+
+    def insert_company_data(self, data):
+        """
+        Inserts company data into the Companies table.
+        
+        :param data: A list of tuples containing company data to be inserted.
+                     Each tuple should contain (name, catch_phrase, bs).
+        """
+        query = '''INSERT INTO Companies (name, catch_phrase, bs)
+                   VALUES (?, ?, ?)'''
+        self.cursor.executemany(query, data)
+        self.conn.commit()
+
+    def insert_customer_data(self, data):
+        """
+        Inserts customer data into the Customers table.
+        """
+        query = '''INSERT INTO Customers (customer_id, company_id, name, username, email, phone, website, street, suite, city, zipcode, geo_lat, geo_lng)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+        self.cursor.executemany(query, data)
+        self.conn.commit()
+
+    def insert_product_data(self, data):
+        """
+        Inserts product data into the Products table.
+        """
+        query = '''INSERT INTO Products (product_id, name, price) VALUES (?, ?, ?)'''
+        self.cursor.executemany(query, data)
+        self.conn.commit()
+
+    def insert_orders_data(self, data):
+        """
+        Inserts orders data into the Orders table.
+        """
+        query = '''INSERT INTO Orders (order_id, customer_id, order_date, product_id, quantity) VALUES (?, ?, ?, ?, ?)'''
+        self.cursor.executemany(query, data)
+        self.conn.commit()
+
+    def insert_weather_data(self, data):
+        """
+        Inserts weather data into the WeatherRecord table.
+        """
+        query = '''INSERT INTO WeatherRecord (customer_id, latitude, longitude, main_weather, description, temperature, humidity, weather_date)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
+        self.cursor.executemany(query, data)
+        self.conn.commit()
+
+
+
+
+
+
 # Initialize with the sales data path and weather API key
 weather_api_key = 'cbbda7a0b45fcdb72e944964c45c80c4'
 data_extractor = DataExtractor('sales_data.csv', weather_api_key)
@@ -269,7 +403,7 @@ if data_extractor.sales_data is not None:
     prepare_weather_data_test = transformation.prepare_weather_data()
     print(prepare_weather_data_test)
     print("*******************************")
-    exit()
+    
     # Calculate total sales per customer and save to CSV
     total_sales_per_customer = transformation.calculate_total_sales_per_customer()
     total_sales_per_customer.to_csv('total_sales_per_customer.csv', index=True)
@@ -279,7 +413,7 @@ if data_extractor.sales_data is not None:
     average_order_quantity_per_product.to_csv('average_order_quantity_per_product.csv', index=True)
 
     # Identify top-selling products and save to CSV
-    top_selling_products = transformation.identify_top_selling_products_or_customers()[0] # Assuming this returns a tuple (products, customers)
+    top_selling_products = transformation.identify_top_selling_products_or_customers()[0] 
     top_selling_products.to_csv('top_selling_products.csv', index=True)
 
     # Analyze sales trends over time and save to CSV
@@ -290,6 +424,34 @@ if data_extractor.sales_data is not None:
     weather_impact = transformation.include_weather_data_in_analysis()
     weather_impact.to_csv('weather_impact.csv', index=True)
     
-    
 else:
     print("Failed to load sales data.")
+
+
+db_manager = DatabaseManager('your_database_name.db')
+
+# Connect to the database
+db_manager.connect()
+
+# Create tables if they don't exist
+db_manager.create_tables()
+
+
+
+# Insert data (assuming you have dataframes for each table)
+# Convert dataframes to tuples for insertion
+customer_data = prepare_customer_data_test.to_records(index=False).tolist()
+product_data = prepare_product_data_test.to_records(index=False).tolist()
+orders_data = prepare_orders_data_test.to_records(index=False).tolist()
+weather_data = prepare_weather_data_test.to_records(index=False).tolist()
+company_data = prepare_company_data_test.to_records(index=False).tolist()
+
+# Insert data into tables
+db_manager.insert_customer_data(customer_data)
+db_manager.insert_product_data(product_data)
+db_manager.insert_orders_data(orders_data)
+db_manager.insert_weather_data(weather_data)
+db_manager.insert_company_data(company_data)
+# Close the database connection
+
+
