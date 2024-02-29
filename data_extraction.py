@@ -125,7 +125,8 @@ class Transformation:
 
     def prepare_weather_data(self):
         """
-        Prepares weather data for the WeatherRecord table including customer ID.
+        Prepares weather data for the WeatherRecord table including customer ID,
+        matching weather_date with order_date.
         """
         # Convert 'weather_data' from string to dictionary if it's not already
         self.sales_data['weather_data'] = self.sales_data['weather_data'].apply(
@@ -151,19 +152,23 @@ class Transformation:
                     'description': weather_description.get('description'),
                     'temperature': main_weather.get('temp'),
                     'humidity': main_weather.get('humidity'),
-                    'weather_date': pd.to_datetime(weather_data.get('dt'), unit='s')
+                    'weather_date': row['order_date']  # match with order_date
                 })
 
         # Create a DataFrame from the records
         weather_info = pd.DataFrame(weather_records)
 
-        # Drop any duplicates based on date to avoid one-to-many relationships
-        weather_info.drop_duplicates(subset=['customer_id', 'weather_date'], inplace=True)
+        # Convert 'order_date' to datetime and use it as 'weather_date'
+        weather_info['weather_date'] = pd.to_datetime(weather_info['weather_date'])
+
+        # # Drop any duplicates based on customer_id and weather_date to avoid one-to-many relationships
+        # weather_info.drop_duplicates(subset=['customer_id', 'weather_date'], inplace=True)
 
         # Reset the index of the DataFrame
         weather_info.reset_index(drop=True, inplace=True)
 
         return weather_info
+
 
 
 
