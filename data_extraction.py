@@ -281,7 +281,6 @@ class DatabaseManager:
             )''',
             '''CREATE TABLE IF NOT EXISTS Products (
                 product_id INTEGER PRIMARY KEY,
-                name TEXT NOT NULL,
                 price REAL
             )''',
             '''CREATE TABLE IF NOT EXISTS Orders (
@@ -366,7 +365,7 @@ class DatabaseManager:
         """
         Inserts product data into the Products table.
         """
-        query = '''INSERT INTO Products (product_id, name, price) VALUES (?, ?, ?)'''
+        query = '''INSERT INTO Products (product_id, price) VALUES (?, ?)'''
         self.cursor.executemany(query, data)
         self.conn.commit()
 
@@ -488,12 +487,12 @@ weather_data = prepare_weather_data_test.to_records(index=False).tolist()
 company_data = prepare_company_data_test.to_records(index=False).tolist()
 
 # Insert data into tables
-#db_manager.insert_product_data(product_data)
 #db_manager.insert_orders_data(orders_data)
 # Downs are working 
 db_manager.insert_weather_data(weather_data)
 db_manager.insert_company_data(company_data)
 db_manager.insert_customer_data(customer_data)
+db_manager.insert_product_data(product_data)
 
 
 
