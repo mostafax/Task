@@ -23,6 +23,7 @@ class DataExtractor:
     def read_sales_data(self):
         """Reads sales data from a CSV file into a pandas DataFrame."""
         self.sales_data = pd.read_csv(self.sales_data_path)
+        self.sales_data.drop_duplicates(subset=['order_id'], inplace=True)
         print("Sales data read successfully.")
     
     def fetch_all_users_data(self):
@@ -377,7 +378,7 @@ class DatabaseManager:
         """
         Inserts orders data into the Orders table.
         """
-        query = '''INSERT INTO Orders (order_id, customer_id, order_date, product_id, quantity) VALUES (?, ?, ?, ?, ?)'''
+        query = '''INSERT  OR IGNORE INTO Orders (order_id, customer_id, order_date, product_id, quantity) VALUES (?, ?, ?, ?, ?)'''
         self.cursor.executemany(query, data)
         self.conn.commit()
 
@@ -406,8 +407,57 @@ class DatabaseManager:
         except sqlite3.Error as e:
             print(f"Error fetching data from Companies table: {e}")
 
+    def show_orders_table(self):
+        """
+        Retrieves and prints all rows from the Orders table.
+        """
+        query = "SELECT * FROM Orders"
+        try:
+            self.cursor.execute(query)
+            orders = self.cursor.fetchall()
+            if orders:
+                print("Orders Table Contents:")
+                for order in orders:
+                    print(order)  # Each 'order' is a tuple representing a row from the Orders table.
+            else:
+                print("The Orders table is empty.")
+        except sqlite3.Error as e:
+            print(f"Error fetching data from Orders table: {e}")
 
 
+
+    def get_table_row_count(self, table_name):
+        """
+        Returns the number of rows in the specified table.
+        """
+        query = f"SELECT COUNT(*) FROM {table_name}"
+        try:
+            self.cursor.execute(query)
+            count = self.cursor.fetchone()[0]
+            return count
+        except sqlite3.Error as e:
+            print(f"Error fetching row count from {table_name} table: {e}")
+            return None
+
+    def show_weather_record_table(self):
+        """
+        Retrieves and prints all rows from the WeatherRecord table.
+        """
+        query = "SELECT * FROM WeatherRecord"
+        try:
+            self.cursor.execute(query)
+            weather_records = self.cursor.fetchall()
+            if weather_records:
+                print("WeatherRecord Table Contents:")
+                for record in weather_records:
+                    # Each 'record' is a tuple representing a row from the WeatherRecord table
+                    print(record)
+            else:
+                print("The WeatherRecord table is empty.")
+        except sqlite3.Error as e:
+            print(f"Error fetching data from WeatherRecord table: {e}")
+
+# This method has been modified to use the
 
 
 
@@ -471,7 +521,6 @@ if data_extractor.sales_data is not None:
 else:
     print("Failed to load sales data.")
 
-
 db_manager = DatabaseManager('your_database_name.db')
 
 # Connect to the database
@@ -500,9 +549,12 @@ db_manager.insert_product_data(product_data)
 db_manager.insert_orders_data(orders_data)
 
 
-
 db_manager.show_company_table()
-
+db_manager.show_orders_table()
+db_manager.show_weather_record_table()
+# The above code is attempting to print the row count of the "Orders" table using a function called
+# `get_table_row_count` from a `db_manager` object.
+print(db_manager.get_table_row_count("Orders"))
 # Close the database connection
 
 
