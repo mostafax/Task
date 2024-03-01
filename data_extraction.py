@@ -104,11 +104,15 @@ class Transformation:
 
     def prepare_product_data(self):
         """
-        Prepares product data for the Products table.
+        Prepares product data for the Products table, ensuring no duplicate product_ids are included,
+        even if they have different prices. Keeps the first occurrence of each product_id.
         """
-        # Adjust this method to fit the product information available in your data
-        product_info = self.sales_data[['product_id', 'price']].drop_duplicates()
+        product_info = self.sales_data.drop_duplicates(subset=['product_id'], keep='first')
+            
+            # Select only the 'product_id' and 'price' columns
+        product_info = product_info[['product_id', 'price']]
         return product_info
+
 
     def prepare_orders_data(self):
         # Since OrderDetails is removed, we include product_id and quantity in Orders
@@ -487,12 +491,13 @@ weather_data = prepare_weather_data_test.to_records(index=False).tolist()
 company_data = prepare_company_data_test.to_records(index=False).tolist()
 
 # Insert data into tables
-#db_manager.insert_orders_data(orders_data)
 # Downs are working 
 db_manager.insert_weather_data(weather_data)
 db_manager.insert_company_data(company_data)
 db_manager.insert_customer_data(customer_data)
+
 db_manager.insert_product_data(product_data)
+db_manager.insert_orders_data(orders_data)
 
 
 
