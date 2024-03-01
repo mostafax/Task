@@ -86,17 +86,18 @@ class Transformation:
     def prepare_customer_data(self):
         customer_info = pd.json_normalize(self.sales_data['user_data'])
         customer_info.rename(columns={'id': 'customer_id'}, inplace=True)
-        # Including address information directly in the customer data
+        # Including address and company information directly in the customer data
         customer_info = customer_info[['customer_id', 'name', 'username', 'email', 'phone', 'website', 
                                        'address.street', 'address.suite', 'address.city', 'address.zipcode',
-                                       'address.geo.lat', 'address.geo.lng']].drop_duplicates()
+                                       'address.geo.lat', 'address.geo.lng', 'company.name']].drop_duplicates()
         customer_info.rename(columns={
             'address.street': 'street',
             'address.suite': 'suite',
             'address.city': 'city',
             'address.zipcode': 'zipcode',
             'address.geo.lat': 'geo_lat',
-            'address.geo.lng': 'geo_lng'
+            'address.geo.lng': 'geo_lng',
+            'company.name': 'company_name'  # Rename company.name to company_name
         }, inplace=True)
         
         return customer_info
@@ -330,12 +331,36 @@ class DatabaseManager:
 
     def insert_customer_data(self, data):
         """
-        Inserts customer data into the Customers table.
+        Inserts customer data into the Customers table, fetching company_id based on company name.
+        
+        :param data: A list of tuples containing customer data to be inserted, where one of the fields is expected to be 'company_name'.
         """
-        query = '''INSERT INTO Customers (customer_id, company_id, name, username, email, phone, website, street, suite, city, zipcode, geo_lat, geo_lng)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
-        self.cursor.executemany(query, data)
+        for customer in data:
+            # Extract company_name from the customer tuple
+            # Assume company_name is at a specific index, e.g., the second item in the tuple for this example
+            company_name = customer[-1]
+            print(company_name)
+            # Fetch company_id based on company_name
+            self.cursor.execute("SELECT company_id FROM Companies WHERE name = ?", (company_name,))
+            company_row = self.cursor.fetchone()
+            print(company_row)
+            print("-------------")
+            if company_row:
+                company_id = company_row[0]
+                # Replace company_name with company_id in the customer tuple
+                # Assuming company_name is the second element, and customer_id is the first element in the tuple
+                customer_with_id = (customer[0],) + (company_id,) + customer[1:-1]  # Exclude the last item (company_name)
+                
+                # Prepare the SQL query without company_name
+                query = '''INSERT INTO Customers (customer_id, company_id, name, username, email, phone, website, street, suite, city, zipcode, geo_lat, geo_lng)
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'''
+                self.cursor.execute(query, customer_with_id)
+            else:
+                print(f"Company not found for name: {company_name}")
+                continue  # Skip this customer or handle the case as needed
+            
         self.conn.commit()
+
 
     def insert_product_data(self, data):
         """
@@ -361,6 +386,22 @@ class DatabaseManager:
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)'''
         self.cursor.executemany(query, data)
         self.conn.commit()
+    def show_company_table(self):
+        """
+        Retrieves and prints all rows from the Companies table.
+        """
+        query = "SELECT * FROM Companies"
+        try:
+            self.cursor.execute(query)
+            companies = self.cursor.fetchall()
+            if companies:
+                print("Company Table Contents:")
+                for company in companies:
+                    print(company)  # Each 'company' is a tuple representing a row from the Companies table.
+            else:
+                print("The Companies table is empty.")
+        except sqlite3.Error as e:
+            print(f"Error fetching data from Companies table: {e}")
 
 
 
@@ -394,7 +435,7 @@ if data_extractor.sales_data is not None:
     prepare_company_data_test = transformation.prepare_company_data()
     print(prepare_company_data_test)
     print("*******************************")
-
+    prepare_company_data_test.to_csv('prepare_company_data_test.csv', index=False)
     
     prepare_orders_data_test = transformation.prepare_orders_data()
     print(prepare_orders_data_test)
@@ -447,11 +488,17 @@ weather_data = prepare_weather_data_test.to_records(index=False).tolist()
 company_data = prepare_company_data_test.to_records(index=False).tolist()
 
 # Insert data into tables
-db_manager.insert_customer_data(customer_data)
-db_manager.insert_product_data(product_data)
-db_manager.insert_orders_data(orders_data)
+#db_manager.insert_product_data(product_data)
+#db_manager.insert_orders_data(orders_data)
+# Downs are working 
 db_manager.insert_weather_data(weather_data)
 db_manager.insert_company_data(company_data)
+db_manager.insert_customer_data(customer_data)
+
+
+
+db_manager.show_company_table()
+
 # Close the database connection
 
 
