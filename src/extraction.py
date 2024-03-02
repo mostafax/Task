@@ -47,7 +47,7 @@ class DataExtractor:
         lat, lon = geo['lat'], geo['lng']
         response = requests.get(f'http://api.openweathermap.org/data/2.5/weather',
                                 params={'lat': lat, 'lon': lon, 'appid': self.weather_api_key})
-        print("OUT")
+        print("fetching weather data")
         return response.json() if response.status_code == 200 else print("Weather data not found.")
 
     def enrich_sales_data(self):

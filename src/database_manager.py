@@ -68,6 +68,16 @@ class DatabaseManager:
                 humidity INTEGER,
                 weather_date DATE,
                 FOREIGN KEY (customer_id) REFERENCES Customers (customer_id)
+            )''',
+            '''CREATE TABLE IF NOT EXISTS TotalSalesPerCustomer (
+            customer_id INTEGER PRIMARY KEY,
+            total_sales REAL,
+            FOREIGN KEY (customer_id) REFERENCES Customers (customer_id)
+            )''',
+            '''CREATE TABLE IF NOT EXISTS AverageOrderQuantityPerProduct (
+            product_id INTEGER PRIMARY KEY,
+            average_quantity REAL,
+            FOREIGN KEY (product_id) REFERENCES Products (product_id)
             )'''
         ]
         for command in commands:
@@ -120,6 +130,32 @@ class DatabaseManager:
                 print(f"Company not found for name: {company_name}")
                 continue  # Skip this customer or handle the case as needed
             
+        self.conn.commit()
+
+
+    def insert_total_sales_per_customer(self, data):
+        """
+        Inserts total sales data per customer into the TotalSalesPerCustomer table.
+        
+        Parameters:
+        - data: A list of tuples, where each tuple contains:
+            - customer_id (int): The customer's ID.
+            - total_sales (float): The total sales amount for the customer.
+        """
+        query = '''INSERT INTO TotalSalesPerCustomer (customer_id, total_sales) VALUES (?, ?) ON CONFLICT(customer_id) DO UPDATE SET total_sales = excluded.total_sales'''
+        self.cursor.executemany(query, data)
+        self.conn.commit()
+    def insert_average_order_quantity_per_product(self, data):
+        """
+        Inserts average order quantity data per product into the AverageOrderQuantityPerProduct table.
+        
+        Parameters:
+        - data: A list of tuples, where each tuple contains:
+            - product_id (int): The product's ID.
+            - average_quantity (float): The average order quantity for the product.
+        """
+        query = '''INSERT INTO AverageOrderQuantityPerProduct (product_id, average_quantity) VALUES (?, ?) ON CONFLICT(product_id) DO UPDATE SET average_quantity = excluded.average_quantity'''
+        self.cursor.executemany(query, data)
         self.conn.commit()
 
 

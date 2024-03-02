@@ -1,12 +1,11 @@
 
 from extraction import DataExtractor
-from transforamtion import Transformation
+from transformation import Transformation
 from database_manager import DatabaseManager
-
 import json
 
 # Define the path to your configuration file
-config_file_path = 'path/to/config.json'
+config_file_path = '../config/config.json'
 
 
 # Read the configuration file
@@ -29,7 +28,7 @@ if data_extractor.sales_data is not None:
 
     # Enrich the sales data with user and weather data
     data_extractor.enrich_sales_data()
-    data_extractor.save_enriched_data_to_csv("../outputs/data.csv")
+    #data_extractor.save_enriched_data_to_csv("../outputs/data.csv")
     # Instantiate the Transformation class with the enriched sales data
     transformation = Transformation(data_extractor.sales_data)
     prepare_customer_data_test = transformation.prepare_customer_data()
@@ -42,7 +41,6 @@ if data_extractor.sales_data is not None:
     prepare_company_data_test = transformation.prepare_company_data()
     print(prepare_company_data_test)
     print("*******************************")
-    prepare_company_data_test.to_csv('../outputs/prepare_company_data_test.csv', index=False)
     
     prepare_orders_data_test = transformation.prepare_orders_data()
     print(prepare_orders_data_test)
@@ -66,7 +64,7 @@ if data_extractor.sales_data is not None:
 
     # Analyze sales trends over time and save to CSV
     sales_trends = transformation.analyze_sales_trends_over_time()
-    sales_trends.to_csv('../outputs/sales_trends.csv', index=True)
+    sales_trends.to_csv('../outputs/sales_trends_per_date.csv', index=True)
 
     # Include weather data in analysis and save to CSV
     weather_impact = transformation.include_weather_data_in_analysis()
@@ -83,8 +81,6 @@ db_manager.connect()
 # Create tables if they don't exist
 db_manager.create_tables()
 
-
-
 # Insert data (assuming you have dataframes for each table)
 # Convert dataframes to tuples for insertion
 customer_data = prepare_customer_data_test.to_records(index=False).tolist()
@@ -92,23 +88,22 @@ product_data = prepare_product_data_test.to_records(index=False).tolist()
 orders_data = prepare_orders_data_test.to_records(index=False).tolist()
 weather_data = prepare_weather_data_test.to_records(index=False).tolist()
 company_data = prepare_company_data_test.to_records(index=False).tolist()
+total_sales_per_customer = total_sales_per_customer.to_records(index=False).tolist()
+average_order_quantity_per_product = average_order_quantity_per_product.to_records(index=False).tolist()
 
 # Insert data into tables
-# Downs are working 
 db_manager.insert_weather_data(weather_data)
 db_manager.insert_company_data(company_data)
 db_manager.insert_customer_data(customer_data)
-
 db_manager.insert_product_data(product_data)
 db_manager.insert_orders_data(orders_data)
+db_manager.insert_total_sales_per_customer(total_sales_per_customer)
+db_manager.insert_average_order_quantity_per_product(average_order_quantity_per_product)
 
 
 db_manager.show_company_table()
 db_manager.show_orders_table()
 db_manager.show_weather_record_table()
-# The above code is attempting to print the row count of the "Orders" table using a function called
-# `get_table_row_count` from a `db_manager` object.
-print(db_manager.get_table_row_count("Orders"))
 # Close the database connection
-
+db_manager.close()
 

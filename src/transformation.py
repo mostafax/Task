@@ -105,13 +105,25 @@ class Transformation:
 
 
     def calculate_total_sales_per_customer(self):
-        """Calculates total sales amount per customer."""
+        """Calculates total sales amount per customer and returns a DataFrame."""
+        # Calculate the sales amount by multiplying quantity by price
         self.sales_data['sales_amount'] = self.sales_data['quantity'] * self.sales_data['price']
-        return self.sales_data.groupby('customer_id')['sales_amount'].sum()
+        
+        # Group by customer_id and sum sales_amount, then reset index to make customer_id a column
+        total_sales_per_customer = self.sales_data.groupby('customer_id')['sales_amount'].sum().reset_index()
+        
+        # Optionally, rename the columns for clarity
+        total_sales_per_customer.columns = ['customer_id', 'total_sales']
+        
+        return total_sales_per_customer
+
 
     def determine_average_order_quantity_per_product(self):
-        """Determines the average order quantity per product."""
-        return self.sales_data.groupby('product_id')['quantity'].mean()
+        """Determines the average order quantity per product and returns a DataFrame."""
+        avg_quantity_per_product = self.sales_data.groupby('product_id')['quantity'].mean().reset_index()
+        avg_quantity_per_product.columns = ['product_id', 'average_quantity']
+        return avg_quantity_per_product
+
 
     def identify_top_selling_products_or_customers(self):
         """Identifies the top-selling products or customers."""
