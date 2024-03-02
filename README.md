@@ -66,11 +66,20 @@ This command creates a Docker image named sales-data-pipeline, encapsulating all
 
 ### Running Natively
 
+Create outputs file to store all output on the same level as /data_pipline/
+
 ```bash
 python3 src/main.py
 ```
+
 ### Running in Docker 
 
+
 ```bash
-docker run --name sales-data-pipeline-container sales-data-pipeline
+docker run -v /home/mostafa/workspace/task/outputs:/app/outputs/ -it docker.io/library/sales-data-pipeline
 ```
+
+
+## Data Storage
+
+![DB Design](src/db/db_desgin.png "DB Design")
