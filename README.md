@@ -29,3 +29,14 @@ This repository contains the implementation of a comprehensive sales data pipeli
 |-- Dockerfile             # Dockerfile for creating a containerized version
 |-- requirements.txt       # The dependencies for the project
 `-- README.md              # Documentation for the project
+```
+
+## Getting Started
+# Prerequisites
+you need to create folder data inside data-pipeline/ containing sales data csv.
+You will also need to create API key for OpenWeatherMap
+# Installation
+
+You will need to isntall  python (3.10.12), pip and the requrienatenr  file
+or 
+directly run docker 
