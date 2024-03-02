@@ -80,7 +80,7 @@ python3 main.py
 
 
 ```bash
-docker run -v /home/mostafa/workspace/task/outputs:/app/outputs/ -it docker.io/library/sales-data-pipeline
+docker run -v /home/mostafa/workspace/task/outputs:/app/outputs/ -it sales-data-pipeline
 ```
 
 
