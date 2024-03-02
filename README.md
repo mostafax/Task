@@ -14,7 +14,6 @@ This repository contains the implementation of a comprehensive sales data pipeli
   - [Weather Data](#weather-data)
 - [Data Manipulation and Aggregations](#data-manipulation-and-aggregations)
 - [Data Storage](#data-storage)
-- [Documentation](#documentation)
 - [Dockerization](#dockerization)
 
 # Project Structure
@@ -24,8 +23,11 @@ This repository contains the implementation of a comprehensive sales data pipeli
 |   |-- main.py            # Main script to run the data pipeline
 |   |-- extraction.py      # Modules to handle API requests
 |   |-- transforamtion.py      # Modules for data transformation
-|   |-- database_manager.py/      # Modules for database operations
+|   |-- database_manager.py      # Modules for database operations
 |   `-- db/                # Folder for database file 
+|-- config/
+|   |-- config.json            # All project configration
+|-- outputs/             # All project outputs
 |-- Dockerfile             # Dockerfile for creating a containerized version
 |-- requirements.txt       # The dependencies for the project
 `-- README.md              # Documentation for the project
