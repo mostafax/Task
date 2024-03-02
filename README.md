@@ -17,7 +17,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 - [Documentation](#documentation)
 - [Dockerization](#dockerization)
 
-## Project Structure
+# Project Structure
 ```plaintext
 /data-pipeline/
 |-- src/
@@ -31,12 +31,36 @@ This repository contains the implementation of a comprehensive sales data pipeli
 `-- README.md              # Documentation for the project
 ```
 
-## Getting Started
-# Prerequisites
+# Getting Started
+## Prerequisites
 you need to create folder data inside data-pipeline/ containing sales data csv.
 You will also need to create API key for OpenWeatherMap
-# Installation
+## Installation
 
-You will need to isntall  python (3.10.12), pip and the requrienatenr  file
+### Using Python
+
+1. Ensure that Python version 3.10.12 is installed on your system. You can download it from the [official Python website](https://www.python.org/downloads/).
+2. Install pip, Python's package installer, if it's not already installed.
+3. Navigate to the root directory of the project and install the required dependencies with the following command:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Using Docker
+Alternatively, if you prefer to use Docker, build the Docker image with the following command:
+
+```bash
+docker build -t sales-data-pipeline .
+```
+
+This command creates a Docker image named sales-data-pipeline, encapsulating all the necessary dependencies.
+
+
+##  Usage
+
+
+python3 src/main.py
+
 or 
-directly run docker 
+docker run --name sales-data-pipeline-container sales-data-pipeline
