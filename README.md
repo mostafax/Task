@@ -8,13 +8,9 @@ This repository contains the implementation of a comprehensive sales data pipeli
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Usage](#usage)
-- [Data Transformation](#data-transformation)
-  - [Sales Data](#sales-data)
-  - [User Data](#user-data)
-  - [Weather Data](#weather-data)
-- [Data Manipulation and Aggregations](#data-manipulation-and-aggregations)
+- [Data Transformation,Manipulation and Aggregations](#data-transformation)
+- [Data ](#data-manipulation-and-aggregations)
 - [Data Storage](#data-storage)
-- [Dockerization](#dockerization)
 
 # Project Structure
 ```plaintext
@@ -82,6 +78,39 @@ python3 main.py
 docker run -v /home/mostafa/workspace/task/outputs:/app/outputs/ -it sales-data-pipeline
 ```
 
+## Data Transformation
+
+## Transformation Class
+
+### Preparing Customer Data
+Customer information is extracted and normalized from the enriched sales data. It assumes that user data is embedded within the sales data DataFrame as dictionaries and that all necessary user fields are present.
+
+### Preparing Product Data
+Product information is extracted, ensuring no duplicate `product_id` entries. It assumes that product IDs are unique and that the first occurrence of each product ID has the correct price.
+
+### Preparing Orders Data
+Order information is extracted without duplication. This step assumes that the sales data includes all necessary order details.
+
+### Preparing Company Data
+Company information is extracted from the user data. This assumes that each user's company information is correctly formatted and present.
+
+### Preparing Weather Data
+Weather data is prepared by extracting and normalizing relevant details from the weather data associated with each sale. It assumes weather data is present for all sales and that the structure of the weather data is consistent.
+
+### Calculating Total Sales Per Customer
+Total sales per customer are calculated by summing up the sales amounts (quantity multiplied by price) for each customer. This assumes that each sale includes a valid customer ID, quantity, and price.
+
+### Determining Average Order Quantity Per Product
+The average order quantity for each product is calculated. This assumes that sales data includes a valid `product_id` and `quantity` for each sale.
+
+### Identifying Top Selling Products or Customers
+This identifies the products and customers with the highest sales and assumes that sales data includes accurate `product_id`, `customer_id`, and sales amount information.
+
+### Analyzing Sales Trends Over Time
+Sales trends are analyzed by summing sales amounts per month, assuming that sales data includes accurate `order_date` and `sales_amount` information.
+
+### Including Weather Data in Analysis
+Average sales amount per weather condition is calculated, assuming that the weather data has been correctly parsed and associated with each sale.
 
 ## Data Storage
 
