@@ -19,7 +19,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 
 # Project Structure
 ```plaintext
-/data-pipeline/
+/task/
 |-- src/
 |   |-- main.py            # Main script to run the data pipeline
 |   |-- extraction.py      # Modules to handle API requests
@@ -63,13 +63,15 @@ This command creates a Docker image named sales-data-pipeline, encapsulating all
 ##  Usage
 
 - After installation, you can run the data pipeline using one of two methods:
+- Create outputs file to store all output on the same level as /task/
+
 
 ### Running Natively
 
-Create outputs file to store all output on the same level as /data_pipline/
-
 ```bash
-python3 src/main.py
+cd src
+
+python3 main.py
 ```
 
 ### Running in Docker 

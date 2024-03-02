@@ -3,10 +3,21 @@ from extraction import DataExtractor
 from transforamtion import Transformation
 from database_manager import DatabaseManager
 
+import json
 
-# Initialize with the sales data path and weather API key
-weather_api_key = 'cbbda7a0b45fcdb72e944964c45c80c4'
-data_extractor = DataExtractor('../data/sales_data.csv', weather_api_key)
+# Define the path to your configuration file
+config_file_path = 'path/to/config.json'
+
+
+# Read the configuration file
+with open(config_file_path, 'r') as config_file:
+    config = json.load(config_file)
+
+# Extract the configuration data
+weather_api_key = config['weather_api_key']
+sales_data_path = config['sales_data_path']
+
+data_extractor = DataExtractor(sales_data_path, weather_api_key)
 
 # Read the sales data
 data_extractor.read_sales_data()
