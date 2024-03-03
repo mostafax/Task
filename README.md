@@ -66,7 +66,7 @@ This command creates a Docker image named sales-data-pipeline, encapsulating all
 ### Running Natively
 
 ```bash
-cd src
+cd src/
 
 python3 main.py
 ```
