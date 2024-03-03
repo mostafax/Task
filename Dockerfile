@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of your application's code
 COPY . /app
+WORKDIR /app/src
 
 # Command to run your application
-CMD ["python3", "your-app-script.py"]
+CMD ["python3", "main.py"]

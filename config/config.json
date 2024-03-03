@@ -1,0 +1,4 @@
+{
+    "weather_api_key": "cbbda7a0b45fcdb72e944964c45c80c4",
+    "sales_data_path": "../data/sales_data.csv"
+  }
