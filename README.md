@@ -12,6 +12,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 - [Data ](#data-manipulation-and-aggregations)
 - [Data Storage](#data-storage)
 
+
 # Project Structure
 ```plaintext
 /task/
