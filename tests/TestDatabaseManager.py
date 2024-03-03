@@ -9,7 +9,6 @@ sys.path.append(str(parent_dir_src))
 from database_manager import DatabaseManager
 
 
-
 class TestDatabaseManager(unittest.TestCase):
 
     @classmethod

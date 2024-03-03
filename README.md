@@ -191,5 +191,10 @@ chmod -R 777 outputs/
 cd tests/
 
 python3 TestDatabaseManager.py
+```
 
+or 
+
+```bash
+python3 TestDataTransformation.py
 ```

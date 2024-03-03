@@ -9,12 +9,13 @@ config_file_path = '../config/config.json'
 
 
 # Read the configuration file
-with open(config_file_path, 'r') as config_file:
+with open("../config/config.json", 'r') as config_file:
     config = json.load(config_file)
-
+    
 # Extract the configuration data
 weather_api_key = config['weather_api_key']
 sales_data_path = config['sales_data_path']
+
 
 data_extractor = DataExtractor(sales_data_path, weather_api_key)
 
@@ -28,7 +29,7 @@ if data_extractor.sales_data is not None:
 
     # Enrich the sales data with user and weather data
     data_extractor.enrich_sales_data()
-    #data_extractor.save_enriched_data_to_csv("../outputs/data.csv")
+    data_extractor.save_enriched_data_to_csv("../outputs/extracted_data.csv")
     # Instantiate the Transformation class with the enriched sales data
     transformation = Transformation(data_extractor.sales_data)
     prepare_customer_data_test = transformation.prepare_customer_data()
