@@ -10,6 +10,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
   - [Usage](#usage)
 - [Data Transformation,Manipulation and Aggregations](#data-transformation)
 - [Data Storage](#data-storage)
+- [Unit Tests](#unit-tests)
 
 
 # Project Structure
@@ -23,6 +24,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 |   `-- db/                # Folder for database schema image 
 |-- config/
 |   |-- config.json            # All project configuration
+|-- tests/                 # All project tests    
 |-- outputs/             # All project outputs
 |-- Dockerfile             # Dockerfile for creating a containerized version
 |-- requirements.txt       # The dependencies for the project
@@ -170,3 +172,29 @@ The average sales amount per weather condition is calculated, assuming that the 
 - `average_quantity` (DECIMAL(10,2)): The average quantity of the product ordered.
 
 Each `customer_id`, `company_id`, `product_id`, and `weather_record_id` fields are primary keys in their respective tables. The schema shows relationships between tables, such as Customers related to Companies via `company_id`, and Orders related to Customers and Products via `customer_id` and `product_id`, respectively.
+
+## unit-tests
+
+### Preparation
+
+Before running the tests, ensure you have the necessary permissions to create and manipulate files within the outputs folder. This step is crucial for tests that involve file operations.
+#### Change Ownership (Permissions) of the Outputs Folder
+
+To avoid permission-related errors during test execution, modify the permissions of the outputs folder to ensure full access:
+
+```bash
+chmod -R 777 outputs/
+```
+
+#### Running the Tests
+```bash
+cd tests/
+
+python3 TestDatabaseManager.py
+
+```
+
+
+- Unit tests are located in tests/ folder.
+
+first you need to change ownership with chomd -R 777 outputs folder then run them by python3 TestDatabaseManager.py
