@@ -31,7 +31,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 
 # Getting Started
 ## Prerequisites
-- you need to create folder data inside task/ containing sales data csv.
+- you need to create folder data/ inside task/ containing sales data csv.
 - You will also need to create API key for OpenWeatherMap.
 
 ## Installation
@@ -60,7 +60,7 @@ This command creates a Docker image named sales-data-pipeline, encapsulating all
 ## Usage
 
 - After installation, you can run the data pipeline using one of two methods:
-- Create outputs file to store all output on the same level as /task/
+- Create outputs/ folder to store all output on the same level as /task/
 
 
 ### Running Natively
@@ -73,9 +73,9 @@ python3 main.py
 
 ### Running in Docker
 
-
+- replace /home/workspace/task/outputs with your absoulte outputs/ path
 ```bash
-docker run -v /home/mostafa/workspace/task/outputs:/app/outputs/ -it sales-data-pipeline
+docker run -v /home/workspace/task/outputs:/app/outputs/ -it sales-data-pipeline
 ```
 
 ## Data Transformation
