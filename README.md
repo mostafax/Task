@@ -169,4 +169,4 @@ The average sales amount per weather condition is calculated, assuming that the 
 - `product_id` (INT): The ID of the product.
 - `average_quantity` (DECIMAL(10,2)): The average quantity of the product ordered.
 
-Each `customer_id`, `company_id`, `product_id`, and `weather_record_id` fields are likely to be primary keys in their respective tables. The schema shows relationships between tables, such as Customers related to Companies via `company_id`, and Orders related to Customers and Products via `customer_id` and `product_id`, respectively.
+Each `customer_id`, `company_id`, `product_id`, and `weather_record_id` fields are primary keys in their respective tables. The schema shows relationships between tables, such as Customers related to Companies via `company_id`, and Orders related to Customers and Products via `customer_id` and `product_id`, respectively.
