@@ -60,7 +60,7 @@ This command creates a Docker image named sales-data-pipeline, encapsulating all
 ## Usage
 
 - After installation, you can run the data pipeline using one of two methods:
-- Create outputs file to store all output on the same level as /task/
+- Create an outputs/ folder to store all output on the same level as /task/
 
 
 ### Running Natively
@@ -73,9 +73,10 @@ python3 main.py
 
 ### Running in Docker
 
-
+- Edit your absolute path here for the -v flag
+  
 ```bash
-docker run -v /home/mostafa/workspace/task/outputs:/app/outputs/ -it sales-data-pipeline
+docker run -v /home/workspace/task/outputs:/app/outputs/ -it sales-data-pipeline
 ```
 
 ## Data Transformation
