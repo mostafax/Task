@@ -20,7 +20,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 |   |-- extraction.py      # Modules to handle API requests
 |   |-- transformation.py      # Modules for data transformation
 |   |-- database_manager.py      # Modules for database operations
-|   `-- db/                # Folder for database file 
+|   `-- db/                # Folder for database schema image 
 |-- config/
 |   |-- config.json            # All project configuration
 |-- outputs/             # All project outputs
