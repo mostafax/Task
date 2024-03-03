@@ -193,8 +193,3 @@ cd tests/
 python3 TestDatabaseManager.py
 
 ```
-
-
-- Unit tests are located in tests/ folder.
-
-first you need to change ownership with chomd -R 777 outputs folder then run them by python3 TestDatabaseManager.py
