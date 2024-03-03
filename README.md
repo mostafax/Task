@@ -31,7 +31,7 @@ This repository contains the implementation of a comprehensive sales data pipeli
 
 # Getting Started
 ## Prerequisites
-- you need to create folder data inside task/ containing sales data csv.
+- you need to create folder data/ inside task/ containing sales data csv.
 - You will also need to create API key for OpenWeatherMap.
 
 ## Installation
@@ -66,7 +66,7 @@ This command creates a Docker image named sales-data-pipeline, encapsulating all
 ### Running Natively
 
 ```bash
-cd src
+cd src/
 
 python3 main.py
 ```
