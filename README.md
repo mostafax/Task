@@ -9,7 +9,6 @@ This repository contains the implementation of a comprehensive sales data pipeli
   - [Installation](#installation)
   - [Usage](#usage)
 - [Data Transformation,Manipulation and Aggregations](#data-transformation)
-- [Data ](#data-manipulation-and-aggregations)
 - [Data Storage](#data-storage)
 
 
